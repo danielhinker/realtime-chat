@@ -1,64 +1,83 @@
 require('dotenv').config()
 const express = require('express');
-var app = express();
-var http = require('http').createServer(app);
-var io = require('socket.io')(http);
+const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const passport = require('passport');
+const passportLocalMongoose = require('passport-local-mongoose')
 
-bodyParser = require('body-parser');
-// const encrypt = require("mongoose-encryption");
-const md5 = require('md5');
+// Specifies which directory from which to serve static assets
+// app.use(express.static('public'))
+
 // support parsing of application/json type post data
 app.use(bodyParser.json());
 
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Sets up config for session
+app.use(session({
+  secret: 'xm57)7~gNQzK@.3ljNfZwT7h]A1%!4',
+  resave: false,
+  saveUninitialized: false
+}))
 
+// Initializes passport and sesion
+app.use(passport.initialize())
+app.use(passport.session())
 
-mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect('mongodb://localhost:27017/userDB', {useNewUrlParser: true, useUnifiedTopology: true});
 
 const userSchema = new mongoose.Schema({
   username: String,
   password: String
 })
 
-// Previously used with Mongoose Encryption
-// userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ['password']})
+userSchema.plugin(passportLocalMongoose);
 
-const User = new mongoose.model("User", userSchema)
+const User = new mongoose.model('User', userSchema);
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
  
-app.get("/register", function(req, res){
+app.get('/register', function(req, res){
   res.sendFile(__dirname + '/register.html');
 });
 
+app.get('/', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.sendFile(__dirname + "/index.html");
+  } else {
+    // res.sendFile(__dirname + "/index.html");
+    res.redirect('/login');
+  }
+})
 
 
-app.post("/register", function(req, res){
-  bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
-    const newUser =  new User({
-      username: req.body.username,
-      password: hash
-      // Previously used with md5 hash
-      // password: md5(req.body.password)
-    });
-    newUser.save(function(err){
-      if (err) {
-        console.log(err);
-      } else {
-        res.sendFile(__dirname + '/index.html')
-      }
-    });
-  });
 
+app.post('/register', function(req, res){
+  User.register({username: req.body.username}, req.body.password, (err, user) => {
+    if (err) {
+      console.log(err);
+      res.redirect('/register')
+    } else {
+      passport.authenticate('local')(req, res, ()=>{
+        res.redirect('/');
+      })
+    }
+  })
   
 });
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
+// app.get('/', (req, res) => {
+//   res.sendFile(__dirname + '/index.html');
+// });
 
 io.on('connection', (socket) => {
   console.log('a user connected');
@@ -75,32 +94,30 @@ http.listen(3000, () => {
 //   });
 // });
 
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/')
+})
+
 app.get('/login', (req, res)=>{
 
   res.sendFile(__dirname + '/login.html');
 })
 
 app.post('/login', (req, res)=>{
-  const username = req.body.username;
-  const password = req.body.password
-  // Previously used with md5
-  // const password = md5(req.body.password);
-
-  User.findOne({username: username}, function(err, foundUser){
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password
+  })
+  req.login(user, (err) => {
     if (err) {
       console.log(err);
     } else {
-      if (foundUser) {
-        
-        bcrypt.compare(password, foundUser.password, (err, result)=>{
-          if (result == true) {
-            res.redirect("/");
-          }
-        })
-        
-      }
+      passport.authenticate('local')(req, res, () => {
+        res.redirect('/');
+      })
     }
-  });
+  })
 })
 
 io.on('connection', (socket) => {
