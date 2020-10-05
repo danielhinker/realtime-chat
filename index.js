@@ -9,6 +9,15 @@ const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose')
 
+const port = process.env.PORT || 5000
+app.listen(port)
+
+let info = {
+  db: process.env.db,
+  username: process.env.username,
+  password: process.env.password,
+};
+
 // Specifies which directory from which to serve static assets
 app.use(express.static('public'))
 
@@ -30,7 +39,20 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-mongoose.connect('mongodb://localhost:27017/userDB', {useNewUrlParser: true, useUnifiedTopology: true});
+// mongoose.connect('mongodb://localhost:27017/userDB', {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect(
+  "mongodb+srv://" +
+    info.username +
+    ":" +
+    info.password +
+    "@cluster0.memc3.mongodb.net/" +
+    info.db +
+    "?retryWrites=true&w=majority",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
 
 const userSchema = new mongoose.Schema({
   username: String,
