@@ -1,4 +1,4 @@
-// const chatMessage = $('#messages')
+// const userList = $('#users')
 
 $(function () {
     var socket = io();
@@ -18,4 +18,11 @@ $(function () {
     });
   });
 
- 
+//  function createUserList(users) {
+//      userList.innerHTML = '';
+//      users.forEach(user=>{
+//          const li = document.createElement('li');
+//          li.innerText = user.username;
+//          userList.appendChild(li);
+//      })
+//  }

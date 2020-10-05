@@ -8,8 +8,8 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose')
-
 const port = process.env.PORT || 3000
+const { currentUser, userJoin } = require('./helper.js');
 
 io.on('connection', (socket) => {
   console.log('a user connected');
@@ -150,15 +150,48 @@ app.post('/login', (req, res)=>{
 })
 
 io.on('connection', (socket) => {
+
+  const nameArray = ['Teetering Turtle', 'Crazy Cat', 'Wallowing Walrus', 'Dauntless Dino', 'Glaring Giraffe', 'Happy Hipo']
+  const name = nameArray[Math.floor(Math.random() * nameArray.length)]
+  // socket.on('chat message', { name } => {
+  const user = userJoin(socket.id, name);
+  // socket.join(user.room)
+  // })
+  
+  // socket.on('joinRoom', ({ username, room }) => {
+  //   const user = userJoin(socket.id, username, room);
+
+  //   socket.join(user.room)
+
+  //   socket.emit('message', 'Welcome to ChatCord!');
+
+  //   soc
+  // })
+
   socket.on('chat message', (msg) => {
-    const user = socket.id
-    const nameArray = ['Teetering Turtle', 'Crazy Cat', 'Wallowing Walrus', 'Dauntless Dino', 'Glaring Giraffe', 'Happy Hipo']
-    const name = nameArray[Math.floor(Math.random() * nameArray.length)]
-    io.emit('chat message', user.slice(0,5) + ": " + msg);
+    const user = currentUser(socket.id);
+    
+    io.emit('chat message', user.username + ": " + msg);
   });
   // socket.on('send-nickname', (nickname) => {
     // socket.nickname = nickname;
     // userSchema.push(socket.nickname);
   // });
+  socket.on('disconnect', () => {
+    // const user = userLeave(socket.id);
+
+    // if (user) {
+    //   io.to(user.room).emit(
+    //     'message',
+    //     formatMessage(botName, `${user.username} has left the chat`)
+    //   );
+
+    //   // Send users and room info
+    //   io.to(user.room).emit('roomUsers', {
+    //     room: user.room,
+    //     users: getRoomUsers(user.room)
+    //   });
+    // }
+  });
 });
 
