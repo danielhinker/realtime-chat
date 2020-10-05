@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="styles.css">
     
   </head>
   <body>
@@ -14,20 +14,8 @@
 
     <script src="/socket.io/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script>
-  $(function () {
-    var socket = io();
-    $('form').submit(function(e){
-      e.preventDefault(); // prevents page reloading
-      socket.emit('chat message', $('#m').val());
-      $('#m').val('');
-      return false;
-    });
-    socket.on('chat message', (msg)=>{
-      $('#messages').append($('<li>').text(msg));
-    });
-  });
-
+<script src='main.js'>
+  
 </script>
 
   </body>

@@ -9,7 +9,7 @@ const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose')
 
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 3000
 
 io.on('connection', (socket) => {
   console.log('a user connected');
@@ -48,20 +48,20 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-// mongoose.connect('mongodb://localhost:27017/userDB', {useNewUrlParser: true, useUnifiedTopology: true});
-mongoose.connect(
-  "mongodb+srv://" +
-    info.username +
-    ":" +
-    info.password +
-    "@cluster0.memc3.mongodb.net/" +
-    info.db +
-    "?retryWrites=true&w=majority",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+mongoose.connect('mongodb://localhost:27017/userDB', {useNewUrlParser: true, useUnifiedTopology: true});
+// mongoose.connect(
+//   "mongodb+srv://" +
+//     info.username +
+//     ":" +
+//     info.password +
+//     "@cluster0.memc3.mongodb.net/" +
+//     info.db +
+//     "?retryWrites=true&w=majority",
+//   {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   }
+// );
 
 const userSchema = new mongoose.Schema({
   username: String,
@@ -148,5 +148,10 @@ app.post('/login', (req, res)=>{
 io.on('connection', (socket) => {
   socket.on('chat message', (msg) => {
     io.emit('chat message', msg);
+    console.log(socket.id)
   });
+  // socket.on('send-nickname', (nickname) => {
+    // socket.nickname = nickname;
+    // userSchema.push(socket.nickname);
+  // });
 });
