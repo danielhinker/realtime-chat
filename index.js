@@ -152,7 +152,6 @@ app.post('/login', (req, res)=>{
 io.on('connection', (socket) => {
   socket.on('chat message', (msg) => {
     io.emit('chat message', msg);
-    console.log(socket.id)
   });
   // socket.on('send-nickname', (nickname) => {
     // socket.nickname = nickname;
