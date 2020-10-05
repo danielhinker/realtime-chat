@@ -151,10 +151,14 @@ app.post('/login', (req, res)=>{
 
 io.on('connection', (socket) => {
   socket.on('chat message', (msg) => {
-    io.emit('chat message', msg);
+    const user = socket.id
+    const nameArray = ['Teetering Turtle', 'Crazy Cat', 'Wallowing Walrus', 'Dauntless Dino', 'Glaring Giraffe', 'Happy Hipo']
+    const name = nameArray[Math.floor(Math.random() * nameArray.length)]
+    io.emit('chat message', user.slice(0,5) + ": " + msg);
   });
   // socket.on('send-nickname', (nickname) => {
     // socket.nickname = nickname;
     // userSchema.push(socket.nickname);
   // });
 });
+
