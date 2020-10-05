@@ -10,7 +10,8 @@ const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose')
 
 // Specifies which directory from which to serve static assets
-// app.use(express.static('public'))
+app.use(express.static('public'))
+
 
 // support parsing of application/json type post data
 app.use(bodyParser.json());
