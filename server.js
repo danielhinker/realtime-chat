@@ -9,7 +9,7 @@ const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 const port = process.env.PORT || 3000;
-const { currentUser, userJoin } = require('./helper.js');
+const { currentUser, userJoin, userLeave } = require('./helper.js');
 
 io.on('connection', (socket) => {
   console.log('a user connected');
@@ -155,6 +155,10 @@ io.on('connection', (socket) => {
   const name = nameArray[Math.floor(Math.random() * nameArray.length)]
   // socket.on('chat message', { name } => {
   const user = userJoin(socket.id, name);
+
+  socket.emit('chat message', 'Welcome to Passel Chat!');
+
+  socket.broadcast.emit('chat message', `${user.username} has joined the chat`);
   // socket.join(user.room)
   // })
   
@@ -178,13 +182,13 @@ io.on('connection', (socket) => {
     // userSchema.push(socket.nickname);
   // });
   socket.on('disconnect', () => {
-    // const user = userLeave(socket.id);
+    const user = userLeave(socket.id);
 
-    // if (user) {
-    //   io.to(user.room).emit(
-    //     'message',
-    //     formatMessage(botName, `${user.username} has left the chat`)
-    //   );
+    if (user) {
+      io.emit(
+        'chat message', `${user.username} has left the chat`
+      );
+    }
 
     //   // Send users and room info
     //   io.to(user.room).emit('roomUsers', {
