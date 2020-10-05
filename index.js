@@ -48,20 +48,24 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-mongoose.connect('mongodb://localhost:27017/userDB', {useNewUrlParser: true, useUnifiedTopology: true});
-// mongoose.connect(
-//   "mongodb+srv://" +
-//     info.username +
-//     ":" +
-//     info.password +
-//     "@cluster0.memc3.mongodb.net/" +
-//     info.db +
-//     "?retryWrites=true&w=majority",
-//   {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   }
-// );
+if (process.env.NODE_ENV) {
+  mongoose.connect(
+    "mongodb+srv://" +
+      info.username +
+      ":" +
+      info.password +
+      "@cluster0.memc3.mongodb.net/" +
+      info.db +
+      "?retryWrites=true&w=majority",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  );
+  
+} else {
+  mongoose.connect('mongodb://localhost:27017/userDB', {useNewUrlParser: true, useUnifiedTopology: true});
+}
 
 const userSchema = new mongoose.Schema({
   username: String,
